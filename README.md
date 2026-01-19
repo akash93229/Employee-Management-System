@@ -2,7 +2,7 @@
 
 A web application I built to manage employee records, track attendance, and generate reports. This was my first full-stack project where I learned how frontend and backend work together.
 
-![Login Screen](screenshots/Screenshot%20(453).png)
+![Login Screen](screenshots/Login.png)
 
 ## What It Does
 
@@ -39,12 +39,12 @@ I chose this stack because I wanted to learn both JavaScript and C#, and underst
 ## Screenshots
 
 ### Managing Employees
-![Employee Dashboard](screenshots/Screenshot%20(454).png)
+![Employee Dashboard](screenshots/Add%20Employee.png)
 
 You can add, edit, and delete employees. The form validates everything before saving.
 
 ### Reports
-![Reports](screenshots/Screenshot%20(455).png)
+![Reports](screenshots/Reports.png)
 
 Generate different reports like department statistics, attendance summaries, and salary breakdowns. You can export them too.
 
