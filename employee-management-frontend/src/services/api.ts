@@ -16,12 +16,22 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
       // Try to get error message from response
       let errorMessage = `API Error: ${response.status} ${response.statusText}`;
       try {
-        const errorData = await response.text();
-        if (errorData) {
-          errorMessage = errorData;
+        const errorData = await response.json();
+        if (errorData && errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData && errorData.error) {
+          errorMessage = errorData.error;
         }
       } catch (e) {
-        // If we can't parse the error, use the status text
+        // If we can't parse JSON, try text
+        try {
+          const textError = await response.text();
+          if (textError) {
+            errorMessage = textError;
+          }
+        } catch (e2) {
+          // Use the default error message
+        }
       }
       throw new Error(errorMessage);
     }
@@ -38,8 +48,12 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     } else {
       return {}; // Return empty object for non-JSON responses
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('API call failed:', error);
+    // Re-throw with a more user-friendly message if it's a network error
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Cannot connect to server. Please check if the backend is running.');
+    }
     throw error;
   }
 };

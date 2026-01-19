@@ -43,6 +43,26 @@ namespace EmployeeManagementAPI.Controllers
         {
             try
             {
+                // Validate required fields
+                if (string.IsNullOrWhiteSpace(employee.FirstName) || 
+                    string.IsNullOrWhiteSpace(employee.LastName) ||
+                    string.IsNullOrWhiteSpace(employee.Email) ||
+                    string.IsNullOrWhiteSpace(employee.Phone) ||
+                    string.IsNullOrWhiteSpace(employee.Department) ||
+                    string.IsNullOrWhiteSpace(employee.Position))
+                {
+                    return BadRequest(new { message = "All fields are required" });
+                }
+
+                // Check if email already exists
+                var existingEmployee = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.Email.ToLower() == employee.Email.ToLower());
+                
+                if (existingEmployee != null)
+                {
+                    return BadRequest(new { message = "An employee with this email already exists" });
+                }
+
                 // Set default values
                 employee.IsActive = true;
                 employee.CreatedDate = DateTime.Now;
@@ -54,6 +74,15 @@ namespace EmployeeManagementAPI.Controllers
                     message = "Employee created successfully", 
                     employee = employee 
                 });
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle database-specific errors
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("Duplicate"))
+                {
+                    return BadRequest(new { message = "An employee with this email already exists" });
+                }
+                return StatusCode(500, new { message = "Database error occurred", error = ex.InnerException?.Message ?? ex.Message });
             }
             catch (Exception ex)
             {
@@ -74,6 +103,18 @@ namespace EmployeeManagementAPI.Controllers
             if (existingEmployee == null)
             {
                 return NotFound(new { message = "Employee not found" });
+            }
+
+            // Check if email is being changed to one that already exists
+            if (existingEmployee.Email.ToLower() != employee.Email.ToLower())
+            {
+                var emailExists = await _context.Employees
+                    .AnyAsync(e => e.Email.ToLower() == employee.Email.ToLower() && e.Id != id);
+                
+                if (emailExists)
+                {
+                    return BadRequest(new { message = "An employee with this email already exists" });
+                }
             }
 
             // Update properties
@@ -99,6 +140,14 @@ namespace EmployeeManagementAPI.Controllers
                     return NotFound(new { message = "Employee not found" });
                 }
                 return StatusCode(500, new { message = "Error updating employee" });
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("Duplicate"))
+                {
+                    return BadRequest(new { message = "An employee with this email already exists" });
+                }
+                return StatusCode(500, new { message = "Database error occurred", error = ex.InnerException?.Message ?? ex.Message });
             }
             catch (Exception ex)
             {
