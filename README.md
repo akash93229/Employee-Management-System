@@ -192,10 +192,3 @@ This is a learning project, so some things are simplified:
 
 But it works, and I'm proud of it. It taught me how full-stack applications actually work.
 
-## License
-
-Feel free to use this code for learning. MIT License.
-
----
-
-Built by Akash as a learning project | [GitHub](https://github.com/akash93229)
